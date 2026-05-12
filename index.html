@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Smart Tracking</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- ICON -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- BACKGROUND BLUR -->
+    <div class="bg-blur one"></div>
+    <div class="bg-blur two"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="logo">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>Smart Tracking</span>
+      </div>
+
+      <!-- MENU -->
+      <ul class="nav-links">
+        <li><a href="#">Beranda</a></li>
+        <li><a href="#fitur">Fitur</a></li>
+        <li><a href="#tentang">Tentang</a></li>
+        <li><a href="admin.html">Admin</a></li>
+      </ul>
+
+      <!-- BUTTON -->
+      <button class="dashboard-btn">Dashboard</button>
+
+      <!-- HAMBURGER -->
+      <div class="hamburger" id="hamburger">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="beranda">
+      <!-- LEFT -->
+      <div class="hero-text">
+        <div class="badge">🚀 Tracking Jadi Lebih Mudah</div>
+
+        <h1>
+          Smart Arrival
+          <span>Tracking</span>
+        </h1>
+
+        <p>
+          Pantau perjalanan peserta secara real-time dan kelola penjemputan
+          dengan lebih mudah, cepat, dan efisien.
+        </p>
+
+        <div class="hero-buttons">
+          <input
+            type="text"
+            id="username"
+            placeholder="Masukkan nama kamu..."
+          />
+
+          <button class="primary-btn">Mulai Tracking</button>
+
+          <button class="secondary-btn">Lihat Demo</button>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats">
+          <div class="stat-box">
+            <i class="fa-solid fa-users"></i>
+            <div>
+              <h3>500+</h3>
+              <span>Peserta</span>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <i class="fa-solid fa-map"></i>
+            <div>
+              <h3>15+</h3>
+              <span>Kota</span>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <i class="fa-solid fa-bolt"></i>
+            <div>
+              <h3>Realtime</h3>
+              <span>Update</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="hero-image">
+        <div class="phone-card">
+          <div id="map"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="fitur">
+      <div class="section-title">
+        <span>Fitur Unggulan</span>
+        <h2>Semua yang Anda Butuhkan</h2>
+        <p>Fitur lengkap untuk memudahkan tracking dan koordinasi peserta.</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <i class="fa-solid fa-location-dot"></i>
+          <h3>Tracking Real-time</h3>
+          <p>Pantau lokasi peserta secara langsung.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fa-solid fa-chart-line"></i>
+          <h3>Dashboard Interaktif</h3>
+          <p>Lihat semua peserta dalam satu map.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fa-solid fa-clock"></i>
+          <h3>Estimasi Tiba</h3>
+          <p>Perkiraan waktu tiba lebih akurat.</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fa-solid fa-bell"></i>
+          <h3>Notifikasi</h3>
+          <p>Notifikasi otomatis saat hampir tiba.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARA KERJA -->
+    <section class="cara-kerja" id="cara-kerja">
+      <div class="section-title">
+        <span>Cara Kerja</span>
+        <h2>Bagaimana Sistem Ini Bekerja?</h2>
+      </div>
+
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Buka Link Tracking</h3>
+          <p>Peserta cukup membuka link tracking yang diberikan panitia.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Izinkan Lokasi</h3>
+          <p>Browser akan meminta izin akses lokasi peserta secara realtime.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Pantau Perjalanan</h3>
+          <p>
+            Panitia dapat memantau perjalanan peserta secara langsung di
+            dashboard.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TENTANG -->
+    <section class="tentang" id="tentang">
+      <div class="tentang-content">
+        <div class="tentang-text">
+          <span>Tentang Kami</span>
+
+          <h2>Solusi Tracking Modern Untuk Event & Komunitas</h2>
+
+          <p>
+            Smart Tracking membantu panitia memantau perjalanan peserta secara
+            realtime agar proses penjemputan menjadi lebih cepat, efisien, dan
+            terorganisir.
+          </p>
+
+          <p>
+            Sistem ini dirancang khusus untuk seminar, retret, komunitas,
+            pelayanan, dan event besar lainnya.
+          </p>
+        </div>
+
+        <div class="tentang-card">
+          <i class="fa-solid fa-map-location-dot"></i>
+        </div>
+      </div>
+    </section>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>

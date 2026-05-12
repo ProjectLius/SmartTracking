@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Admin Tracking</title>
+
+    <!-- LEAFLET -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- ICON -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #020817;
+        color: white;
+        overflow-x: hidden;
+      }
+
+      /* =========================
+       BACKGROUND
+    ========================= */
+
+      .bg-blur {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -1;
+      }
+
+      .bg1 {
+        width: 300px;
+        height: 300px;
+        background: #2563eb;
+        top: -100px;
+        left: -100px;
+      }
+
+      .bg2 {
+        width: 350px;
+        height: 350px;
+        background: #7c3aed;
+        right: -100px;
+        bottom: -100px;
+      }
+
+      /* =========================
+       NAVBAR
+    ========================= */
+
+      .navbar {
+        width: 100%;
+        height: 80px;
+
+        padding: 0 8%;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        position: fixed;
+        top: 0;
+        left: 0;
+
+        z-index: 999;
+
+        backdrop-filter: blur(20px);
+
+        background: rgba(15, 23, 42, 0.7);
+
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo i {
+        font-size: 24px;
+        color: #3b82f6;
+      }
+
+      .logo h1 {
+        font-size: 22px;
+      }
+
+      .status {
+        padding: 12px 18px;
+
+        border-radius: 15px;
+
+        background: rgba(255, 255, 255, 0.05);
+
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+
+        border-radius: 50%;
+
+        background: #22c55e;
+
+        box-shadow: 0 0 15px #22c55e;
+      }
+
+      /* =========================
+       CONTAINER
+    ========================= */
+
+      .container {
+        width: 100%;
+
+        padding: 120px 8% 40px;
+
+        display: grid;
+
+        grid-template-columns: 350px 1fr;
+
+        gap: 25px;
+      }
+
+      /* =========================
+       SIDEBAR
+    ========================= */
+
+      .sidebar {
+        padding: 30px;
+
+        border-radius: 30px;
+
+        background: rgba(255, 255, 255, 0.04);
+
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        backdrop-filter: blur(20px);
+
+        height: fit-content;
+      }
+
+      .sidebar h2 {
+        font-size: 28px;
+        margin-bottom: 15px;
+      }
+
+      .sidebar p {
+        color: #94a3b8;
+        line-height: 1.7;
+        margin-bottom: 30px;
+      }
+
+      .stats {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .stat-box {
+        padding: 20px;
+
+        border-radius: 20px;
+
+        background: rgba(255, 255, 255, 0.05);
+
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .stat-box h3 {
+        font-size: 32px;
+        color: #3b82f6;
+        margin-bottom: 5px;
+      }
+
+      .stat-box span {
+        color: #94a3b8;
+      }
+
+      /* =========================
+       MAP CARD
+    ========================= */
+
+      .map-card {
+        padding: 20px;
+
+        border-radius: 30px;
+
+        background: rgba(255, 255, 255, 0.04);
+
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        backdrop-filter: blur(20px);
+      }
+
+      .map-header {
+        margin-bottom: 20px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .map-header h2 {
+        font-size: 26px;
+      }
+
+      #map {
+        width: 100%;
+
+        height: 650px;
+
+        border-radius: 25px;
+
+        overflow: hidden;
+      }
+
+      /* =========================
+       LEAFLET
+    ========================= */
+
+      .leaflet-popup-content-wrapper {
+        background: #0f172a;
+        color: white;
+        border-radius: 18px;
+      }
+
+      .leaflet-popup-tip {
+        background: #0f172a;
+      }
+
+      /* =========================
+       MOBILE
+    ========================= */
+
+      @media (max-width: 992px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          order: 2;
+        }
+
+        .map-card {
+          order: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          padding: 0 5%;
+          height: 75px;
+        }
+
+        .logo h1 {
+          font-size: 18px;
+        }
+
+        .status {
+          font-size: 13px;
+          padding: 10px 14px;
+        }
+
+        .container {
+          padding: 100px 5% 30px;
+        }
+
+        .sidebar {
+          padding: 25px;
+        }
+
+        .sidebar h2 {
+          font-size: 24px;
+        }
+
+        .map-header h2 {
+          font-size: 22px;
+        }
+
+        #map {
+          height: 400px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- BACKGROUND -->
+
+    <div class="bg-blur bg1"></div>
+    <div class="bg-blur bg2"></div>
+
+    <!-- NAVBAR -->
+
+    <div class="navbar">
+      <div class="logo">
+        <i class="fa-solid fa-location-dot"></i>
+        <h1>Tracking Admin</h1>
+      </div>
+
+      <div class="status">
+        <div class="dot"></div>
+        <span>Realtime Active</span>
+      </div>
+    </div>
+
+    <!-- CONTAINER -->
+
+    <div class="container">
+      <!-- SIDEBAR -->
+
+      <div class="sidebar">
+        <h2>🚗 Live Tracking</h2>
+
+        <p>
+          Dashboard realtime untuk memantau lokasi user secara langsung
+          menggunakan GPS dan Google Sheet.
+        </p>
+
+        <div class="stats">
+          <div class="stat-box">
+            <h3 id="totalUsers">0</h3>
+            <span>Total User</span>
+          </div>
+
+          <div class="stat-box">
+            <h3>LIVE</h3>
+            <span>Status Tracking</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP -->
+
+      <div class="map-card">
+        <div class="map-header">
+          <h2>🗺️ Realtime Map</h2>
+        </div>
+
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- LEAFLET -->
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- ADMIN JS -->
+    <script>
+      const password = prompt("Masukkan Password Admin");
+
+      if (password !== "yulius123") {
+        alert("Akses Ditolak!");
+
+        window.location.href = "index.html";
+      }
+    </script>
+    <script src="admin.js"></script>
+  </body>
+</html>
