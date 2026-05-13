@@ -16,19 +16,67 @@ const API_URL =
   "https://script.google.com/macros/s/AKfycbyZTlXf_rCzYHqvJpeRTtHn2adlRkIVZ4jms_W2VxnlbBA1rcp3hXY_c73vrbFOpw6qNA/exec";
 
 /* =========================
-   ICON MOBIL
+   USER LIST
 ========================= */
 
-const carIcon = L.icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/744/744465.png",
-
-  iconSize: [45, 45],
-
-  iconAnchor: [22, 22],
-});
+const userList = document.getElementById("userList");
 
 /* =========================
-   SIMPAN MARKER
+   WARNA USER
+========================= */
+
+const userColors = {};
+
+const colors = [
+  "#3b82f6", // biru
+  "#ef4444", // merah
+  "#22c55e", // hijau
+  "#f59e0b", // kuning
+  "#a855f7", // ungu
+  "#ec4899", // pink
+  "#14b8a6", // teal
+  "#f97316", // orange
+];
+
+/* =========================
+   AMBIL WARNA USER
+========================= */
+
+function getUserColor(nama) {
+  if (!userColors[nama]) {
+    const randomColor = colors[Object.keys(userColors).length % colors.length];
+
+    userColors[nama] = randomColor;
+  }
+
+  return userColors[nama];
+}
+
+/* =========================
+   CUSTOM MARKER
+========================= */
+
+function createCarIcon(color) {
+  return L.divIcon({
+    className: "custom-car",
+
+    html: `
+      <div style="
+        background:${color};
+        width:20px;
+        height:20px;
+        border-radius:50%;
+        border:3px solid white;
+        box-shadow:0 0 15px ${color};
+      "></div>
+    `,
+
+    iconSize: [20, 20],
+  });
+}
+
+/* =========================
+   STORAGE
 ========================= */
 
 let markers = {};
@@ -37,8 +85,10 @@ let polylines = {};
 
 let paths = {};
 
+let usersRendered = {};
+
 /* =========================
-   AMBIL DATA USER
+   LOAD DATA
 ========================= */
 
 async function loadLocations() {
@@ -47,9 +97,17 @@ async function loadLocations() {
 
     const data = await response.json();
 
+    console.log("DATA:", data);
+
+    /* =========================
+       TOTAL USER
+    ========================= */
+
     document.getElementById("totalUsers").innerHTML = data.length;
 
-    console.log(data);
+    /* =========================
+       LOOP USER
+    ========================= */
 
     data.forEach((user) => {
       const lat = parseFloat(user.latitude);
@@ -58,58 +116,167 @@ async function loadLocations() {
 
       const nama = user.nama;
 
-      /* CEK KOORDINAT VALID */
+      /* VALIDASI */
 
-      if (!lat || !lng) return;
+      if (isNaN(lat) || isNaN(lng)) return;
 
-      /* JIKA MARKER SUDAH ADA */
+      /* =========================
+         STATUS ONLINE
+      ========================= */
+
+      let isOnline = false;
+
+      if (user.timestamp) {
+        const lastUpdate = Date.now() - user.timestamp;
+
+        isOnline = lastUpdate < 15000;
+      }
+
+      const statusText = isOnline ? "🟢 ONLINE" : "🔴 OFFLINE";
+
+      /* =========================
+         USER COLOR
+      ========================= */
+
+      const userColor = getUserColor(nama);
+
+      /* =========================
+         UPDATE MARKER
+      ========================= */
 
       if (markers[nama]) {
+        /* GERAKKAN MARKER */
+
         markers[nama].setLatLng([lat, lng]);
+
+        /* UPDATE POPUP */
+
+        markers[nama].setPopupContent(`
+          <b>${nama}</b><br>
+          ${statusText}<br><br>
+          Latitude: ${lat}<br>
+          Longitude: ${lng}
+        `);
+
+        /* UPDATE PATH */
+
         paths[nama].push([lat, lng]);
 
         /* UPDATE GARIS */
 
         polylines[nama].setLatLngs(paths[nama]);
       } else {
-        /* JIKA BELUM ADA */
+        /* =========================
+           MARKER BARU
+        ========================= */
+
         const marker = L.marker([lat, lng], {
-          icon: carIcon,
+          icon: createCarIcon(userColor),
         }).addTo(map);
 
-        const lastUpdate = Date.now() - user.timestamp;
-
-        const isOnline = lastUpdate < 15000;
-
-        const statusText = isOnline ? "🟢 ONLINE" : "🔴 OFFLINE";
+        /* POPUP */
 
         marker.bindPopup(`
-  <b>${user.nama}</b><br>
-  ${statusText}<br><br>
-  Latitude: ${user.latitude}<br>
-  Longitude: ${user.longitude}
-`);
+          <b>${nama}</b><br>
+          ${statusText}<br><br>
+          Latitude: ${lat}<br>
+          Longitude: ${lng}
+        `);
+
+        /* SIMPAN MARKER */
 
         markers[nama] = marker;
-        /* SIMPAN TITIK PERTAMA */
+
+        /* =========================
+           PATH AWAL
+        ========================= */
 
         paths[nama] = [[lat, lng]];
 
-        /* BUAT GARIS */
+        /* =========================
+           POLYLINE
+        ========================= */
 
         polylines[nama] = L.polyline(paths[nama], {
-          color: "#3b82f6",
-
+          color: userColor,
           weight: 5,
-
           opacity: 0.8,
-
           smoothFactor: 1,
         }).addTo(map);
+
+        /* =========================
+           AUTO FOCUS
+        ========================= */
+
+        map.flyTo([lat, lng], 15, {
+          animate: true,
+          duration: 1.5,
+        });
+      }
+
+      /* =========================
+         LIVE USER LIST
+      ========================= */
+
+      if (!usersRendered[nama]) {
+        const userItem = document.createElement("div");
+
+        userItem.classList.add("user-item");
+
+        userItem.id = `user-${nama}`;
+
+        userItem.innerHTML = `
+
+          <div
+            class="user-dot"
+            style="background:${userColor}"
+          ></div>
+
+          <div class="user-info">
+
+            <div class="user-name">
+              ${nama}
+            </div>
+
+            <div class="user-status">
+              ${statusText}
+            </div>
+
+          </div>
+        `;
+
+        /* =========================
+           CLICK FOCUS
+        ========================= */
+
+        userItem.addEventListener("click", () => {
+          map.flyTo([lat, lng], 17, {
+            animate: true,
+            duration: 1.5,
+          });
+
+          markers[nama].openPopup();
+        });
+
+        userList.appendChild(userItem);
+
+        usersRendered[nama] = true;
+      } else {
+        /* =========================
+           UPDATE STATUS
+        ========================= */
+
+        const statusElement = document.querySelector(
+          `#user-${nama} .user-status`,
+        );
+
+        if (statusElement) {
+          statusElement.innerHTML = statusText;
+        }
       }
     });
   } catch (error) {
-    console.log("ERROR:", error);
+    console.log("ERROR ADMIN:", error);
   }
 }
 
@@ -120,7 +287,7 @@ async function loadLocations() {
 loadLocations();
 
 /* =========================
-   AUTO REFRESH REALTIME
+   REALTIME REFRESH
 ========================= */
 
 setInterval(() => {

@@ -3,12 +3,13 @@
 ========================= */
 
 const hamburger = document.getElementById("hamburger");
-
 const navLinks = document.getElementById("navLinks");
 
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+if (hamburger && navLinks) {
+  hamburger.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+  });
+}
 
 /* AUTO CLOSE MENU */
 
@@ -16,7 +17,9 @@ const navItems = document.querySelectorAll(".nav-links a");
 
 navItems.forEach((item) => {
   item.addEventListener("click", () => {
-    navLinks.classList.remove("active");
+    if (navLinks) {
+      navLinks.classList.remove("active");
+    }
   });
 });
 
@@ -29,7 +32,7 @@ let lastScroll = 0;
 const navbar = document.querySelector(".navbar");
 
 window.addEventListener("scroll", () => {
-  if (window.innerWidth <= 768) {
+  if (navbar && window.innerWidth <= 768) {
     const currentScroll = window.pageYOffset;
 
     /* SCROLL KE BAWAH */
@@ -61,9 +64,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const carIcon = L.icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/744/744465.png",
-
   iconSize: [50, 50],
-
   iconAnchor: [25, 25],
 });
 
@@ -72,6 +73,7 @@ const carIcon = L.icon({
 ========================= */
 
 let carMarker;
+let watchId = null;
 
 /* =========================
    BUTTON TRACKING
@@ -80,119 +82,131 @@ let carMarker;
 const startBtn = document.querySelector(".primary-btn");
 const usernameInput = document.getElementById("username");
 
-startBtn.addEventListener("click", () => {
-  const username = usernameInput.value.trim();
+if (startBtn && usernameInput) {
+  startBtn.addEventListener("click", () => {
+    const username = usernameInput.value.trim();
 
-  if (username === "") {
-    alert("Masukkan nama terlebih dahulu!");
+    if (username === "") {
+      alert("Masukkan nama terlebih dahulu!");
+      return;
+    }
 
-    return;
-  }
-  if (navigator.geolocation) {
-    startBtn.innerHTML = "Mengaktifkan Tracking...";
+    if (navigator.geolocation) {
+      startBtn.innerHTML = "Mengaktifkan Tracking...";
+      startBtn.disabled = true;
 
-    startBtn.disabled = true;
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
 
-    navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = position.coords.latitude;
+          console.log(lat, lng);
 
-        const lng = position.coords.longitude;
+          /* =========================
+             KIRIM KE GOOGLE SHEETS
+          ========================= */
 
-        console.log(lat, lng);
+          fetch(
+            "https://script.google.com/macros/s/AKfycbyZTlXf_rCzYHqvJpeRTtHn2adlRkIVZ4jms_W2VxnlbBA1rcp3hXY_c73vrbFOpw6qNA/exec",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                nama: username,
+                latitude: lat,
+                longitude: lng,
+                waktu: new Date().toLocaleString(),
+              }),
+            },
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Berhasil kirim:", data);
+            })
+            .catch((error) => {
+              console.log("Error:", error);
+            });
 
-        /* =========================
-           KIRIM KE GOOGLE SHEETS
-        ========================= */
+          /* =========================
+             MAP FOLLOW
+          ========================= */
 
-        fetch(
-          "https://script.google.com/macros/s/AKfycbyZTlXf_rCzYHqvJpeRTtHn2adlRkIVZ4jms_W2VxnlbBA1rcp3hXY_c73vrbFOpw6qNA/exec",
-          {
-            method: "POST",
-
-            body: JSON.stringify({
-              nama: namaUser,
-              latitude: lat,
-              longitude: lng,
-              updatedAt: Date.now(),
-              timestamp: Date.now(),
-            }),
-          },
-        )
-          .then((response) => response.json())
-
-          .then((data) => {
-            console.log("Berhasil kirim:", data);
-          })
-
-          .catch((error) => {
-            console.log("Error:", error);
+          map.flyTo([lat, lng], 17, {
+            animate: true,
+            duration: 1.5,
           });
 
-        /* =========================
-           MAP FOLLOW
-        ========================= */
-
-        map.flyTo([lat, lng], 17, {
-          animate: true,
-          duration: 1.5,
-        });
-
-        /* =========================
-           MARKER PERTAMA
-        ========================= */
-
-        if (!carMarker) {
-          carMarker = L.marker([lat, lng], {
-            icon: carIcon,
-          }).addTo(map);
-
-          /* NOTIFIKASI */
-
-          const notif = document.createElement("div");
-
-          notif.classList.add("notif");
-
-          notif.innerHTML = `
-            <h3>Tracking Aktif 🚗</h3>
-            <p>Latitude: ${lat}</p>
-            <p>Longitude: ${lng}</p>
-          `;
-
-          document.body.appendChild(notif);
-
-          setTimeout(() => {
-            notif.remove();
-          }, 4000);
-        } else {
           /* =========================
-           GERAKKAN MOBIL
-        ========================= */
-          carMarker.setLatLng([lat, lng]);
-        }
+             MARKER PERTAMA
+          ========================= */
 
-        startBtn.innerHTML = "Tracking Aktif ✅";
-      },
+          if (!carMarker) {
+            carMarker = L.marker([lat, lng], {
+              icon: carIcon,
+            }).addTo(map);
 
-      (error) => {
-        console.log(error);
+            /* NOTIFIKASI */
 
-        alert("ERROR: " + error.message);
+            const notif = document.createElement("div");
 
-        startBtn.innerHTML = "Gagal Tracking ❌";
+            notif.classList.add("notif");
 
-        startBtn.disabled = false;
-      },
+            notif.innerHTML = `
+              <h3>Tracking Aktif 🚗</h3>
+              <p>Latitude: ${lat}</p>
+              <p>Longitude: ${lng}</p>
+            `;
 
-      {
-        enableHighAccuracy: true,
+            document.body.appendChild(notif);
 
-        maximumAge: 0,
+            setTimeout(() => {
+              notif.remove();
+            }, 4000);
+          } else {
+            /* =========================
+               GERAKKAN MOBIL
+            ========================= */
+            carMarker.setLatLng([lat, lng]);
+          }
 
-        timeout: 5000,
-      },
-    );
-  } else {
-    alert("Browser tidak mendukung geolocation");
-  }
-});
+          startBtn.innerHTML = "Tracking Aktif ✅";
+        },
+
+        (error) => {
+          console.log(error);
+
+          let pesanError = "ERROR: " + error.message;
+
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              pesanError =
+                "Izin lokasi ditolak. Aktifkan akses location di browser.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              pesanError = "Lokasi tidak tersedia.";
+              break;
+            case error.TIMEOUT:
+              pesanError = "Timeout expired. Lokasi terlalu lama didapatkan.";
+              break;
+            default:
+              pesanError = "Terjadi error saat tracking.";
+          }
+
+          alert(pesanError);
+
+          startBtn.innerHTML = "Gagal Tracking ❌";
+          startBtn.disabled = false;
+        },
+
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 20000,
+        },
+      );
+    } else {
+      alert("Browser tidak mendukung geolocation");
+    }
+  });
+} else {
+  console.log("Elemen tombol atau input username tidak ditemukan.");
+}
