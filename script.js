@@ -1,18 +1,21 @@
 /* =========================
-   HAMBURGER MENU
+   HAMBURGER MENU - FIX
 ========================= */
 
-const hamburger = document.getElementById("hamburger");
-const navLinks = document.getElementById("navLinks");
+// Menggunakan querySelector agar bisa mendeteksi Class (.) atau ID (#)
+const hamburger = document.querySelector(".hamburger");
+const navLinks = document.querySelector(".nav-links");
 
 if (hamburger && navLinks) {
-  hamburger.addEventListener("click", () => {
+  hamburger.addEventListener("click", (e) => {
+    e.preventDefault(); // Mencegah loncatan pada beberapa browser mobile
     navLinks.classList.toggle("active");
+    console.log("Menu di-klik!"); // Cek di inspect element HP kalau ada
   });
 }
 
 /* AUTO CLOSE MENU */
-
+// Pastikan selectornya sesuai dengan class di CSS (.nav-links a)
 const navItems = document.querySelectorAll(".nav-links a");
 
 navItems.forEach((item) => {

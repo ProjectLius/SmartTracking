@@ -83,6 +83,7 @@ body {
   display: flex;
   gap: 40px;
   list-style: none;
+  z-index: 1000000;
 }
 
 .nav-links a {
@@ -641,7 +642,6 @@ body {
   border-radius: 35px;
 }
 
-
 /* INPUT NAMA */
 
 #username {
@@ -668,4 +668,16 @@ body {
 
 #username::placeholder {
   color: #94a3b8;
+}
+
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.navbar {
+  z-index: 9999999 !important;
+}
+
+.nav-links {
+  z-index: 9999999 !important;
 }
